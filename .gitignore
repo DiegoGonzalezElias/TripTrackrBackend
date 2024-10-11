@@ -1,7 +1,6 @@
 # compiled output
 /dist
 /node_modules
-
 # Logs
 
 *.log
@@ -37,6 +36,8 @@ lerna-debug.log*
 
 # .env
 .env
+*.env*
+!.env.template
 /environments/.env.*
 !/environments/.env.example
 
