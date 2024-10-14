@@ -20,9 +20,6 @@ app.use('/api/auth', authRoutes);
 // Conectar a la base de datos
 connectDB();
 
-// Rutas
-app.use('/api/auth', authRoutes);
-
 // Escuchar en el puerto configurado
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
