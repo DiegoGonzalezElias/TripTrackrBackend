@@ -41,7 +41,7 @@ export const register = async (req: Request, res: Response, next: NextFunction):
             sameSite: 'strict',
         });
 
-        return res.status(201).json({ accessToken });
+        return res.status(201).json({ accessToken, user: user.email });
     } catch (error) {
         return next(error);  // En lugar de solo devolver undefined, pasamos el error
     }
@@ -74,7 +74,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
             sameSite: 'strict',
         });
 
-        return res.status(200).json({ accessToken });
+        return res.status(200).json({ accessToken, user: user.email });
     } catch (error) {
         return next(error);
     }
