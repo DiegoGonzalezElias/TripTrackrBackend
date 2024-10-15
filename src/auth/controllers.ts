@@ -14,8 +14,13 @@ const createRefreshToken = (user: any) => {
 
 // Registro
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
-    const { email, password } = req.body;
+    const { email, password, confirmPassword } = req.body;
     try {
+
+        if (password !== confirmPassword) {
+            return res.status(400).json({ message: 'Different passwords' });
+        }
+
         const userExists = await User.findOne({ email });
         if (userExists) {
             return res.status(400).json({ message: 'Email already in use' });
