@@ -1,13 +1,25 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 
 // Define la interfaz IUser extendiendo Document
 export interface IUser extends Document {
     email: string;
     password: string;
+    maps: IMapList[],
     refreshToken: string;
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
+
+interface IMapList {
+    mapUid: string;
+    mapName: string;
+}
+
+const mapListSchema: Schema = new mongoose.Schema({
+    mapUid: { type: String, default: uuidv4, unique: true },
+    mapName: { type: String, unique: true },
+});
 
 const userSchema: Schema<IUser> = new mongoose.Schema({
     email: {
@@ -19,6 +31,10 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     password: {
         type: String,
         required: true,
+    },
+    maps: {
+        type: [mapListSchema],
+        default: [],
     },
     refreshToken: {
         type: String,

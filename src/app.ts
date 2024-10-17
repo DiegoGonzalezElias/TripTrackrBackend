@@ -1,5 +1,6 @@
 import express, { Application } from 'express';
 import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/userRoutes';
 import { connectDB } from './database/database';
 import cookieParser from 'cookie-parser';
 import dotenvFlow from 'dotenv-flow';
@@ -22,6 +23,7 @@ app.use(cookieParser());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
 
 // Conectar a la base de datos
 connectDB();
