@@ -75,11 +75,44 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
         const deletedUser = await User.findByIdAndDelete(userId);
 
         if (!deletedUser) {
-            return res.status(404).json({ message: 'User not found' });
+            res.status(404).json({ message: 'User not found' });
+            return;
         }
 
-        return res.status(200).json({ message: 'User deleted successfully' });
+        res.status(200).json({ message: 'User deleted successfully' });
+        return;
     } catch (error) {
         next(error);
     }
 };
+
+export const getUserMaps = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (!req.user || typeof req.user.userId !== 'string') {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        // Obtener el userId desde req.user, que fue asignado en el middleware requireAuth
+        const userId = req.user.userId;
+        // Encuentra el usuario por ID
+        const user = await User.findById(userId);
+
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        const userMapListLength = user.maps.length;
+
+        if (userMapListLength < 0 || userMapListLength === undefined || userMapListLength === null) {
+            res.status(404).json({ message: 'User maps list not found' });
+            return;
+        }
+        res.status(200).json({ message: 'User maps list found', maps: user.maps.map(map => map.mapName) });
+        return;
+
+    } catch (error) {
+        next(error);
+    }
+}
