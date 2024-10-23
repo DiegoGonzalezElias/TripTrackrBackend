@@ -35,4 +35,24 @@ export default class MapServices {
         map.save();
 
     }
+
+    async delete(mapUid: string) {
+        if (!mapUid) {
+            throw {
+                name: 'Delete map error',
+                message: 'Can not delete the map',
+            };
+        }
+
+        const mapExists = await Map.findOne({ uuid: mapUid });
+
+        if (!mapExists) {
+            throw {
+                name: 'Delete map error',
+                message: 'Map does not exist',
+            };
+        }
+
+        await Map.deleteOne({ uuid: mapUid });
+    }
 }
