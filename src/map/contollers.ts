@@ -35,8 +35,6 @@ export const createMap = async (req: Request, res: Response, next: NextFunction)
         const mapServices = new MapServices();
         mapServices.create({ userId, mapName, mapUid })
 
-        /* //create map with owner user
-        new MapServices().create({ userId, mapName, mapUid }) */
         // Guardar el usuario actualizado
         await user.save();
 
