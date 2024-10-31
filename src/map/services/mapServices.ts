@@ -1,9 +1,14 @@
-import Map from '../models/map';
+import Map, { IMarker } from '../models/map';
 
 interface Icreate {
     userId: string;
     mapName: string;
     mapUid: string;
+}
+
+interface Iupdate {
+    mapUid: string;
+    data: IMarker;
 }
 
 export default class MapServices {
@@ -54,5 +59,25 @@ export default class MapServices {
         }
 
         await Map.deleteOne({ uuid: mapUid });
+    }
+
+    async update({ mapUid, data }: Iupdate) {
+        if (!mapUid) {
+            throw {
+                name: 'Update map error',
+                message: 'Can not update the map',
+            };
+        }
+
+        const map = await Map.findOneAndUpdate({ uuid: mapUid },
+            { $push: { "data.markers": data } },
+            { new: true, upsert: false });
+
+        if (!map) {
+            throw {
+                name: 'Update map error',
+                message: 'Map not exists',
+            };
+        }
     }
 }
