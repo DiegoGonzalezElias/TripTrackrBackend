@@ -52,10 +52,10 @@ export const deleteMap = async (req: Request, res: Response, next: NextFunction)
             return;
         }
 
-        const { mapUid } = req.body;
+        const { mapName } = req.body;
 
-        if (!mapUid) {
-            res.status(400).json({ message: 'Map ID is required' });
+        if (!mapName) {
+            res.status(400).json({ message: 'Map name is required' });
             return;
         }
 
@@ -68,6 +68,18 @@ export const deleteMap = async (req: Request, res: Response, next: NextFunction)
             res.status(404).json({ message: 'User not found' });
             return;
         }
+
+        const userMap = user.maps.find((map) => {
+            return map.mapName === mapName;
+        });
+
+        const mapUid = userMap ? userMap.mapUid : undefined;
+
+        if (!mapUid) {
+            res.status(404).json({ message: 'Map ID not found' });
+            return;
+        }
+        //
 
         const map = await Map.findOne({ uuid: mapUid });
 
