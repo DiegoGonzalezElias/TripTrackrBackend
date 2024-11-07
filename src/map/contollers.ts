@@ -215,3 +215,47 @@ export const getMarkers = async (req: Request, res: Response, next: NextFunction
         next(error);
     }
 }
+
+
+export const selectMap = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (!req.user || typeof req.user.userId !== 'string') {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        const { mapName } = req.body;
+
+        if (!mapName) {
+            res.status(400).json({ message: 'Map name is required' });
+            return;
+        }
+
+        const userId = req.user.userId;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        const userMap = user.maps.find((map) => {
+            return map.mapName === mapName;
+        });
+
+        if (!userMap) {
+            res.status(400).json({ message: 'Map does not exist' });
+            return;
+        }
+
+        const index = user.maps.indexOf(userMap);
+        user.maps.splice(index, 1);
+        user.maps.unshift(userMap);
+
+        await user.save();
+
+        res.status(200).json({ message: 'Map selected successfuly' });
+    } catch (error) {
+        next(error);
+    }
+}
