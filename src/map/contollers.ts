@@ -144,25 +144,9 @@ export const updateMap = async (req: Request, res: Response, next: NextFunction)
 
         // Obtener el userId desde req.user, que fue asignado en el middleware requireAuth
         const userId = req.user.userId;
-        // Encuentra el usuario por ID
-        const user = await User.findById(userId);
-
-        if (!user) {
-            res.status(404).json({ message: 'User not found' });
-            return;
-        }
-
-        const mapUid = user.maps.map((map) => {
-            if (map.mapName === mapName) return map.mapUid
-        })[0]
-
-        if (!mapUid) {
-            res.status(404).json({ message: 'Map ID not found' });
-            return;
-        }
 
         const mapServices = new MapServices();
-        await mapServices.update({ mapUid, data })
+        await mapServices.update({ mapName, userId, data })
 
         res.status(200).json({ message: 'Map updated successfuly' });
     } catch (error) {
@@ -178,39 +162,12 @@ export const getMarkers = async (req: Request, res: Response, next: NextFunction
         }
 
         const { mapName } = req.query;
-
-        if (!mapName) {
-            res.status(400).json({ message: 'Map name is required' });
-            return;
-        }
-
-        // Obtener el userId desde req.user, que fue asignado en el middleware requireAuth
         const userId = req.user.userId;
-        // Encuentra el usuario por ID
-        const user = await User.findById(userId);
 
-        if (!user) {
-            res.status(404).json({ message: 'User not found' });
-            return;
-        }
+        const mapServices = new MapServices();
+        const data = await mapServices.getMarkers({ mapName: mapName!.toString(), userId })
 
-        const mapUid = user.maps.map((map) => {
-            if (map.mapName === mapName) return map.mapUid
-        })[0]
-
-        if (!mapUid) {
-            res.status(404).json({ message: 'Map ID not found' });
-            return;
-        }
-
-        const map = await Map.findOne({ uuid: mapUid });
-
-        if (!map) {
-            res.status(404).json({ message: 'Map not found' });
-            return;
-        }
-
-        res.status(200).json({ message: 'Markers obtained successfuly', data: map?.data?.markers });
+        res.status(200).json({ message: 'Markers obtained successfuly', data: data });
     } catch (error) {
         next(error);
     }
