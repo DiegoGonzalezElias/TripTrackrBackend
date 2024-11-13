@@ -1,4 +1,5 @@
 import Map, { IMarker } from '../models/map';
+import User from '../../user/models/user';
 
 interface Icreate {
     userId: string;
@@ -7,7 +8,8 @@ interface Icreate {
 }
 
 interface Iupdate {
-    mapUid: string;
+    mapName: string;
+    userId: string;
     data: IMarker;
 }
 
@@ -61,13 +63,38 @@ export default class MapServices {
         await Map.deleteOne({ uuid: mapUid });
     }
 
-    async update({ mapUid, data }: Iupdate) {
-        if (!mapUid) {
+    async update({ mapName, userId, data }: Iupdate) {
+        if (!mapName) {
             throw {
-                name: 'Update map error',
-                message: 'Can not update the map',
+                name: 'getMarkers error',
+                message: 'Map name not found',
             };
         }
+
+        console.log('userID de update: ', userId)
+
+        // Encuentra el usuario por ID
+        const user = await User.findById(userId);
+
+        if (!user) {
+            throw {
+                name: 'getMarkers error',
+                message: 'User not found',
+            };
+        }
+
+        const mapUid = user.maps.map((map) => {
+            if (map.mapName === mapName) return map.mapUid
+        })[0]
+
+        if (!mapUid) {
+            throw {
+                name: 'getMarkers error',
+                message: 'Can not get markers Map ID not found',
+            };
+        }
+
+        console.log('update data: ', data)
 
         const map = await Map.findOneAndUpdate({ uuid: mapUid },
             { $push: { "data.markers": data } },
@@ -79,5 +106,47 @@ export default class MapServices {
                 message: 'Map not exists',
             };
         }
+
+    }
+
+    async getMarkers({ mapName, userId }: { mapName: string; userId: string }) {
+        if (!mapName) {
+            throw {
+                name: 'getMarkers error',
+                message: 'Map name not found',
+            };
+        }
+
+        // Encuentra el usuario por ID
+        const user = await User.findById(userId);
+
+        if (!user) {
+            throw {
+                name: 'getMarkers error',
+                message: 'User not found',
+            };
+        }
+
+        const mapUid = user.maps.map((map) => {
+            if (map.mapName === mapName) return map.mapUid
+        })[0]
+
+        if (!mapUid) {
+            throw {
+                name: 'getMarkers error',
+                message: 'Can not get markers Map ID not found',
+            };
+        }
+
+        const map = await Map.findOne({ uuid: mapUid });
+
+        if (!map) {
+            throw {
+                name: 'getMarkers error',
+                message: 'Map not exists',
+            };
+        }
+
+        return map?.data?.markers
     }
 }
