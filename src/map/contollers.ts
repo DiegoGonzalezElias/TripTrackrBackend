@@ -216,3 +216,41 @@ export const selectMap = async (req: Request, res: Response, next: NextFunction)
         next(error);
     }
 }
+
+
+export const getEditors = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (!req.user || typeof req.user.userId !== 'string') {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        const userId = req.user.userId;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        const userMap = user.maps[0]
+
+        if (!userMap) {
+            res.status(400).json({ message: 'Map does not exist' });
+            return;
+        }
+
+        const map = await Map.findOne({ uuid: userMap.mapUid })
+
+        const guestMails = await Promise.all(
+            map?.guests.map(async (guest) => {
+                const user = await User.findById(guest);
+                return user?.email;
+            }) || []
+        );
+
+        res.status(200).json({ message: 'Editors obtained successfuly', data: guestMails });
+    } catch (error) {
+        next(error);
+    }
+}
