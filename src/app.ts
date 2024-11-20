@@ -61,7 +61,7 @@ io.on('connect', (socket: Socket) => {
 
         const mapServices = new MapServices();
         const markers = await mapServices.getMarkers({ mapName: data.toString(), userId: socket.user!.userId! })
-        socket.to(data).emit('MARKERS_RESPONSE', markers)
+        io.to(data).emit('MARKERS_RESPONSE', markers)
     })
 
     socket.on('ADD_MARKER', async ({ mapName, markerData }) => {
