@@ -15,8 +15,8 @@ const createRefreshToken = (user: any) => {
 // Registro
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     const { email, password, confirmPassword } = req.body;
-    try {
 
+    try {
         if (password !== confirmPassword) {
             return res.status(400).json({ message: 'Different passwords' });
         }
@@ -25,13 +25,16 @@ export const register = async (req: Request, res: Response, next: NextFunction):
         if (userExists) {
             return res.status(400).json({ message: 'Email already in use' });
         }
-
+        console.log('PREUSER.')
         const user = new User({ email, password });
+        console.log('!!!!!!!: ', user)
 
         const accessToken = createAccessToken(user);
         const refreshToken = createRefreshToken(user);
 
+        console.log('refreshYoken: ', refreshToken)
         user.refreshToken = refreshToken;
+        console.log('??????: ', user)
         await user.save();
 
         // Guardar el refresh token en la cookie
