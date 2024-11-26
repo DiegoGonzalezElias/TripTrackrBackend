@@ -34,7 +34,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/map', mapRoutes);
 
-connectDB();
+if (process.env.NODE_ENV !== 'test') {
+    connectDB();
+}
 
 io.use((socket, next) => {
     const token = socket.handshake.auth.token;
@@ -85,3 +87,6 @@ io.on('connect', (socket: Socket) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+
+export default app;
