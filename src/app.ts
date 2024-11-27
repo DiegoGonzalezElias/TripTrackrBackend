@@ -20,7 +20,7 @@ app.use(cors({
     credentials: true,
 }));
 
-const io = new Server(4000, {
+export const io = new Server(4000, {
     cors: {
         origin: 'http://localhost:5173',
         credentials: true,
@@ -84,9 +84,10 @@ io.on('connect', (socket: Socket) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
-
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
 
 export default app;
