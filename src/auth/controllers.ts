@@ -86,19 +86,15 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 // Refrescar token
 export const refreshToken = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     const refreshToken = req.cookies.refreshToken;
-    console.log('!!refreshToken: ', refreshToken)
     if (!refreshToken) return res.sendStatus(401);
 
     try {
         const decoded: any = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string);
-        console.log('!!DECODED: ', decoded)
 
         const user = await User.findById(decoded.userId);
-        console.log('!!USER: ', user)
         if (!user) return res.sendStatus(403);
 
         const accessToken = createAccessToken(user);
-        console.log('!!accesstoken: ', accessToken)
         return res.json({ accessToken });
     } catch (error) {
         return next(error);

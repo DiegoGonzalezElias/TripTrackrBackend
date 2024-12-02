@@ -71,8 +71,6 @@ export default class MapServices {
             };
         }
 
-        console.log('userID de update: ', userId)
-
         // Encuentra el usuario por ID
         const user = await User.findById(userId);
 
@@ -94,7 +92,6 @@ export default class MapServices {
             };
         }
 
-        console.log('update data: ', data)
 
         const map = await Map.findOneAndUpdate({ uuid: mapUid },
             { $push: { "data.markers": data } },

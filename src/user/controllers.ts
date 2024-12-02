@@ -6,11 +6,11 @@ import MapServices from '../map/services/mapServices';
 
 export const updateUserMaps = async (req: Request, res: Response, next: NextFunction) => {
     try {
+
         if (!req.user || typeof req.user.userId !== 'string') {
             res.status(401).json({ message: 'Unauthorized' });
             return;
         }
-
         // Obtener el userId desde req.user, que fue asignado en el middleware requireAuth
         const userId = req.user.userId;
         const { mapName, action } = req.body;
@@ -103,12 +103,11 @@ export const getUserMaps = async (req: Request, res: Response, next: NextFunctio
             return;
         }
 
-        const userMapListLength = user.maps.length;
-
-        if (userMapListLength < 0 || userMapListLength === undefined || userMapListLength === null) {
+        if (user.maps === undefined || user.maps === null) {
             res.status(404).json({ message: 'User maps list not found' });
             return;
         }
+
         res.status(200).json({ message: 'User maps list found', maps: user.maps.map(map => map.mapName) });
         return;
 
