@@ -10,7 +10,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    io.close();
+    await io.close();
+    db.close();
 });
 
 
