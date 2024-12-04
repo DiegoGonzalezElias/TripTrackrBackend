@@ -137,13 +137,25 @@ export default class MapServices {
 
         const map = await Map.findOne({ uuid: mapUid });
 
-        if (!map) {
+        if (!map || !map.data) {
             throw {
                 name: 'getMarkers error',
                 message: 'Map not exists',
             };
         }
 
-        return map?.data?.markers
+        const markers: IMarker[] = map.data.markers.map((marker) => {
+            const result: IMarker = {
+                name: marker.name,
+                description: marker.description,
+                category: marker.category,
+                latitude: marker.latitude,
+                longitude: marker.longitude,
+                date: marker.date
+            }
+            return result;
+        })
+
+        return markers;
     }
 }
