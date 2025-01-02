@@ -58,12 +58,17 @@ io.on('connect', (socket: Socket) => {
     console.log('Cliente conectado');
 
     socket.on('GET_MARKERS', async (data) => {
+        try {
+            socket.join(data);
 
-        socket.join(data);
+            const mapServices = new MapServices();
+            const markers = await mapServices.getMarkers({ mapName: data as string, userId: socket.user!.userId! })
+            io.to(data).emit('MARKERS_RESPONSE', markers)
+        } catch (error) {
+            console.error('Error al obtener los marcadores:', error);
+            socket.emit('ERROR', { message: 'Error al obtener los marcadores' });
+        }
 
-        const mapServices = new MapServices();
-        const markers = await mapServices.getMarkers({ mapName: data.toString(), userId: socket.user!.userId! })
-        io.to(data).emit('MARKERS_RESPONSE', markers)
     })
 
     socket.on('ADD_MARKER', async ({ mapName, markerData }) => {
@@ -76,6 +81,19 @@ io.on('connect', (socket: Socket) => {
         } catch (error) {
             console.error('Error al agregar el marcador:', error);
             socket.emit('ERROR', { message: 'Error al agregar el marcador' });
+        }
+    });
+
+    socket.on('DELETE_MARKER', async ({ mapName, markerName, latitude, longitude }) => {
+        try {
+            const mapServices = new MapServices();
+            await mapServices.deleteMarker({ mapName, markerName, userId: socket.user!.userId!, latitude, longitude });
+
+            const updatedMarkers = await mapServices.getMarkers({ mapName, userId: socket.user!.userId! });
+            io.to(mapName).emit('MARKERS_RESPONSE', updatedMarkers);
+        } catch (error) {
+            console.error('Error al eliminar el marcador:', error);
+            socket.emit('ERROR', { message: 'Error al eliminar el marcador' });
         }
     });
 

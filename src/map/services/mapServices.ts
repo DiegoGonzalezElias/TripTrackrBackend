@@ -137,11 +137,15 @@ export default class MapServices {
 
         const map = await Map.findOne({ uuid: mapUid });
 
-        if (!map || !map.data) {
+        if (!map) {
             throw {
                 name: 'getMarkers error',
                 message: 'Map not exists',
             };
+        }
+
+        if (!map.data) {
+            return [];
         }
 
         const markers: IMarker[] = map.data.markers.map((marker) => {
@@ -157,5 +161,47 @@ export default class MapServices {
         })
 
         return markers;
+    }
+
+    async deleteMarker({ mapName, userId, markerName, latitude, longitude }: { mapName: string; userId: string; markerName: string; latitude: string; longitude: string }) {
+        if (!mapName) {
+            throw {
+                name: 'deleteMarker error',
+                message: 'Map name not found',
+            };
+        }
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            throw {
+                name: 'deleteMarker error',
+                message: 'User not found',
+            };
+        }
+
+        const mapUid = user.maps.map((map) => {
+            if (map.mapName === mapName) return map.mapUid
+        })[0]
+
+        if (!mapUid) {
+            throw {
+                name: 'deleteMarker error',
+                message: 'Can not get markers Map ID not found',
+            };
+        }
+
+        const map = await Map.findOne({ uuid: mapUid });
+
+        if (!map || !map.data) {
+            throw {
+                name: 'deleteMarker error',
+                message: 'Map not exists',
+            };
+        }
+
+        map.data.markers = map.data.markers.filter((marker) => marker.name !== markerName && marker.latitude !== latitude && marker.longitude !== longitude);
+
+        await map.save();
     }
 }
