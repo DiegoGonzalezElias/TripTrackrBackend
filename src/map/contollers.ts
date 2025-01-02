@@ -173,6 +173,31 @@ export const getMarkers = async (req: Request, res: Response, next: NextFunction
     }
 }
 
+export const deleteMarker = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (!req.user || typeof req.user.userId !== 'string') {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        const { mapName, markerName, latitude, longitude } = req.body;
+
+        if (!mapName || !markerName || !latitude || !longitude) {
+            res.status(400).json({ message: 'Not all parameters passed' });
+            return;
+        }
+
+        const userId = req.user.userId;
+
+        const mapServices = new MapServices();
+        await mapServices.deleteMarker({ mapName, markerName, userId, latitude, longitude })
+
+        res.status(200).json({ message: 'Marker deleted successfuly' });
+    } catch (error) {
+        next(error);
+    }
+}
+
 
 export const selectMap = async (req: Request, res: Response, next: NextFunction) => {
     try {
