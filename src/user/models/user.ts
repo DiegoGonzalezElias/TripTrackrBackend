@@ -17,8 +17,8 @@ interface IMapList {
 }
 
 const mapListSchema: Schema = new mongoose.Schema({
-    mapUid: { type: String, default: uuidv4, unique: true },
-    mapName: { type: String, unique: true },
+    mapUid: { type: String, default: uuidv4, required: true },
+    mapName: { type: String, required: true },
 });
 
 const userSchema: Schema<IUser> = new mongoose.Schema({
