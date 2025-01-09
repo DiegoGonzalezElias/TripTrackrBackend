@@ -92,7 +92,10 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
         const decoded: any = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string);
 
         const user = await User.findById(decoded.userId);
+
         if (!user) return res.sendStatus(403);
+
+        if (!user.refreshToken || (user.refreshToken !== refreshToken)) return res.sendStatus(403);
 
         const accessToken = createAccessToken(user);
         return res.json({ accessToken });

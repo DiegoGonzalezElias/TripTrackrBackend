@@ -279,3 +279,92 @@ export const getEditors = async (req: Request, res: Response, next: NextFunction
         next(error);
     }
 }
+
+export const editEditors = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (!req.user || typeof req.user.userId !== 'string') {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        const { editorEmail, action } = req.body;
+
+
+        if (!action || (action !== 'add' && action !== 'remove')) {
+            res.status(400).json({ message: 'Invalid action. Use "add" or "remove".' });
+            return;
+        }
+
+        const editor = await User.findOne({ email: editorEmail });
+
+        const userId = req.user.userId;
+        const user = await User.findById(userId);
+
+
+
+        if (!user || !editor) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        const userMap = user.maps[0]
+
+        if (!userMap) {
+            res.status(400).json({ message: 'Map does not exist' });
+            return;
+        }
+
+        const map = await Map.findOne({ uuid: userMap.mapUid })
+
+        if (!map) {
+            res.status(400).json({ message: 'Map not found' });
+            return;
+        }
+
+        if (map.owner != userId) {
+            res.status(400).json({ message: 'You are not the owner of the map' });
+            return;
+        }
+
+        if (map.guests.includes(editor?._id as string) && action === 'add') {
+            res.status(400).json({ message: 'Editor already exists' });
+            return;
+        }
+
+        if (action === 'remove') {
+            try {
+                map.guests = map.guests.filter((guest) => guest != editor._id);
+                await map.save();
+
+                editor.maps = editor.maps.filter((map) => map.mapUid != userMap.mapUid);
+                await editor.save();
+
+                res.status(200).json({ message: 'Editor removed successfuly' });
+                return;
+            } catch (error) {
+                res.status(400).json({ message: 'There was an error removing the editor' });
+                return;
+            }
+
+        }
+
+        map.guests.push(editor._id as string);
+
+        const guestMails = await Promise.all(
+            map.guests.map(async (guest) => {
+                const user = await User.findById(guest);
+                if (user) return user.email;
+            }) || []
+        );
+
+        await map.save();
+
+        editor.maps.push({ mapUid: userMap.mapUid, mapName: userMap.mapName });
+
+        await editor.save();
+
+        res.status(200).json({ message: 'Editor added successfuly', data: guestMails });
+    } catch (error) {
+        next(error);
+    }
+}
