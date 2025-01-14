@@ -68,9 +68,33 @@ export const updateUserMaps = async (req: Request, res: Response, next: NextFunc
 };
 
 
-export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteUserAcc = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const userId = req.params.id; // ID del usuario que se va a eliminar
+
+        if (!req.user || typeof req.user.userId !== 'string') {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        const userId = req.user.userId;
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        const mapServices = new MapServices();
+
+        for (const map of user.maps) {
+            await User.updateMany(
+                { 'maps.mapUid': map.mapUid },
+                { $pull: { maps: { mapUid: map.mapUid } } }
+            );
+
+            await mapServices.delete(map.mapUid);
+        }
 
         const deletedUser = await User.findByIdAndDelete(userId);
 
