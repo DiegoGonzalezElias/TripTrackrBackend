@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import User from './models/user';
 import { v4 as uuidv4 } from 'uuid';
 import MapServices from '../map/services/mapServices';
+import { createAccessToken, createRefreshToken } from '../auth/controllers';
 
 
 export const updateUserMaps = async (req: Request, res: Response, next: NextFunction) => {
@@ -139,3 +140,48 @@ export const getUserMaps = async (req: Request, res: Response, next: NextFunctio
         next(error);
     }
 }
+
+export const changeUserPassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { password, newPassword } = req.body;
+
+        if (!req.user || typeof req.user.userId !== 'string') {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+
+        const userId = req.user.userId;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            res.status(400).json({ message: 'Wrong password' });
+            return;
+        }
+
+        user.password = newPassword;
+
+        const accessToken = createAccessToken(user);
+        const refreshToken = createRefreshToken(user);
+
+        user.refreshToken = refreshToken;
+        await user.save(); // Guardar el token en la base de datos
+
+        // Guardar el refresh token en la cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+        });
+
+        res.status(200).json({ message: 'User password updated successfully', accessToken, user: user.email });
+        return;
+    } catch (error) {
+        next(error);
+    }
+};
