@@ -3,12 +3,12 @@ import User from '../user/models/user';
 import jwt from 'jsonwebtoken';
 
 // Crear token de acceso
-const createAccessToken = (user: any) => {
+export const createAccessToken = (user: any) => {
     return jwt.sign({ userId: user._id }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: '15m' });
 };
 
 // Crear token de refresco
-const createRefreshToken = (user: any) => {
+export const createRefreshToken = (user: any) => {
     return jwt.sign({ userId: user._id }, process.env.REFRESH_TOKEN_SECRET as string, { expiresIn: '7d' });
 };
 
