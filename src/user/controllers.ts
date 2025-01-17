@@ -170,9 +170,8 @@ export const changeUserPassword = async (req: Request, res: Response, next: Next
         const refreshToken = createRefreshToken(user);
 
         user.refreshToken = refreshToken;
-        await user.save(); // Guardar el token en la base de datos
+        await user.save();
 
-        // Guardar el refresh token en la cookie
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
