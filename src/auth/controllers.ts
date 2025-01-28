@@ -4,7 +4,17 @@ import jwt from 'jsonwebtoken';
 
 // Crear token de acceso
 export const createAccessToken = (user: any) => {
-    return jwt.sign({ userId: user._id }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: '15m' });
+    const issuedAt = Math.floor(Date.now() / 1000);
+    const expiresAt = issuedAt + 15 * 60;
+
+    return jwt.sign(
+        {
+            userId: user._id,
+            iat: issuedAt,
+            exp: expiresAt,
+        },
+        process.env.ACCESS_TOKEN_SECRET as string
+    );
 };
 
 // Crear token de refresco
