@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import User from './models/user';
 import { v4 as uuidv4 } from 'uuid';
 import MapServices from '../map/services/mapServices';
-import { createAccessToken, createRefreshToken } from '../auth/controllers';
 
 
 export const updateUserMaps = async (req: Request, res: Response, next: NextFunction) => {
@@ -165,20 +164,9 @@ export const changeUserPassword = async (req: Request, res: Response, next: Next
         }
 
         user.password = newPassword;
-
-        const accessToken = createAccessToken(user);
-        const refreshToken = createRefreshToken(user);
-
-        user.refreshToken = refreshToken;
         await user.save();
 
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-        });
-
-        res.status(200).json({ message: 'User password updated successfully', accessToken, user: user.email });
+        res.status(200).json({ message: 'User password updated successfully' });
         return;
     } catch (error) {
         next(error);

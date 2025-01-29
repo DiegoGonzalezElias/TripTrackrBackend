@@ -7,6 +7,6 @@ const router = Router();
 router.post('/update-user-map-list', requireAuth, updateUserMaps);
 router.get('/user-maps', requireAuth, getUserMaps);
 router.delete('/user-acc', requireAuth, deleteUserAcc);
-router.put('/new-password', requireAuth, changeUserPassword);
+router.put('/password', requireAuth, changeUserPassword);
 
 export default router;
