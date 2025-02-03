@@ -9,7 +9,7 @@
     "test:coverage": "jest --coverage",
     "build": "tsc",
     "start": "node dist/app.js",
-    "dev": "cross-env NODE_ENV=dev nodemon --files src/app.ts"
+    "start:dev": "cross-env NODE_ENV=dev nodemon --files src/app.ts"
   },
   "keywords": [],
   "author": "",
