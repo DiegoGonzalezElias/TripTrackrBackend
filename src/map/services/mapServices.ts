@@ -155,12 +155,68 @@ export default class MapServices {
                 category: marker.category,
                 latitude: marker.latitude,
                 longitude: marker.longitude,
-                date: marker.date
+                date: marker.date,
+                visited: marker.visited
             }
             return result;
         })
 
         return markers;
+    }
+
+    async updateMarker({ mapName, data, userId }: {
+        mapName: string;
+        userId: string;
+        data: IMarker
+    }) {
+        if (!mapName) {
+            throw {
+                name: 'updateMarker error',
+                message: 'Map name not found',
+            };
+        }
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            throw {
+                name: 'updateMarker error',
+                message: 'User not found',
+            };
+        }
+
+        const mapUid = user.maps.map((map) => {
+            if (map.mapName === mapName) return map.mapUid
+        })[0];
+
+        if (!mapUid) {
+            throw {
+                name: 'updateMarker error',
+                message: 'Map not found',
+            };
+        }
+
+        const map = await Map.findOneAndUpdate(
+            {
+                uuid: mapUid,
+                'data.markers.name': data.name
+            },
+            {
+                $set: {
+                    'data.markers.$': data
+                }
+            },
+            { new: true }
+        );
+
+        if (!map) {
+            throw {
+                name: 'updateMarker error',
+                message: 'Marker not found',
+            };
+        }
+
+        return map;
     }
 
     async deleteMarker({ mapName, userId, markerName, latitude, longitude }: { mapName: string; userId: string; markerName: string; latitude: string; longitude: string }) {
