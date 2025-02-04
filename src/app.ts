@@ -84,6 +84,19 @@ io.on('connect', (socket: Socket) => {
         }
     });
 
+    socket.on('UPDATE_MARKER', async ({ mapName, markerData }) => {
+        try {
+            const mapServices = new MapServices();
+            await mapServices.updateMarker({ mapName, data: markerData, userId: socket.user!.userId! });
+
+            const updatedMarkers = await mapServices.getMarkers({ mapName, userId: socket.user!.userId! });
+            io.to(mapName).emit('MARKERS_RESPONSE', updatedMarkers);
+        } catch (error) {
+            console.error('Error al actualizar el marcador:', error);
+            socket.emit('ERROR', { message: 'Error al actualizar el marcador' });
+        }
+    });
+
     socket.on('DELETE_MARKER', async ({ mapName, markerName, latitude, longitude }) => {
         try {
             const mapServices = new MapServices();

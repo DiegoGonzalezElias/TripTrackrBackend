@@ -21,6 +21,7 @@ export interface IMarker {
     description?: string;
     category: 'restaurant' | 'hosting' | 'attraction' | 'shopping' | 'transport' | 'other';
     date?: string;
+    visited: boolean | false
 }
 
 const markerSchema: Schema = new mongoose.Schema({
@@ -33,7 +34,8 @@ const markerSchema: Schema = new mongoose.Schema({
         enum: ['restaurant', 'hosting', 'attraction', 'shopping', 'transport', 'other'],
         required: true
     },
-    date: { type: String }
+    date: { type: String },
+    visited: { type: Boolean, default: false }
 });
 
 const mapDataSchema: Schema = new mongoose.Schema({
